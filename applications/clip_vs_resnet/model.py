@@ -78,7 +78,7 @@ class ResNet50Model(BaseModel):
         )
 
     def _load_model(self):
-        model = models.resnet50(pretrained=True)
+        model = models.resnet50(weights="IMAGENET1K_V2")
         model.eval().to(self.device)
         return model
 
@@ -87,6 +87,7 @@ class ResNet50Model(BaseModel):
         tensor_image = self.transform(pil_image).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
+            
             outputs = self.model(tensor_image)
             _, predicted = outputs.max(1)
 
@@ -108,7 +109,7 @@ class ModelFactory:
 
 
 if __name__ == "__main__":
-    image = "../../../_deprecated/initial_attempt/532_v1/ILSVRC2012_val_00000241.JPEG"
+    image = "./data/examples/set_a/000001.jpg"
 
     model = ModelFactory.get_model("clip_vitb32_zeroshot")
     classname = model.get_prediction(image)
@@ -117,3 +118,18 @@ if __name__ == "__main__":
     model = ModelFactory.get_model("resnet50_supervised")
     classname = model.get_prediction(image)
     print(classname)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

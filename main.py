@@ -15,7 +15,7 @@ from components.proposer import (
     VLMProposer,
 )
 from components.ranker import CLIPRanker, LLMRanker, NullRanker, VLMRanker
-
+import json
 
 def load_config(config: str) -> Dict:
     base_cfg = OmegaConf.load("configs/base.yaml")
@@ -112,7 +112,7 @@ def rank(
         table_groundtruth = wandb.Table(dataframe=pd.DataFrame(scored_groundtruth))
         wandb.log({"scored groundtruth": table_groundtruth})
 
-    return [hypothesis["hypothesis"] for hypothesis in scored_hypotheses]
+    return [hypothesis["hypothesis"][1:-1] for hypothesis in scored_hypotheses]
 
 
 def evaluate(args: Dict, ranked_hypotheses: List[str], group_names: List[str]) -> Dict:
@@ -134,30 +134,39 @@ def evaluate(args: Dict, ranked_hypotheses: List[str], group_names: List[str]) -
         wandb.log(metrics)
     return metrics
 
-
+def save_results_to_json(target: str, candidate: str, captions: List[str], output_file: str):
+    results = [{"target": target, "candidate": candidate, "captions": captions}]
+    with open(output_file, "w") as f:
+        json.dump(results, f, indent=2)
+        
 @click.command()
 @click.option("--config", help="config file")
+
+
+
 def main(config):
     logging.info("Loading config...")
     args = load_config(config)
-    # print(args)
+    print(args)
 
     logging.info("Loading data...")
     dataset1, dataset2, group_names = load_data(args)
-    # print(dataset1, dataset2, group_names)
+    print(dataset1, dataset2, group_names)
 
     logging.info("Proposing hypotheses...")
     hypotheses = propose(args, dataset1, dataset2)
-    # print(hypotheses)
+    print(hypotheses)
 
     logging.info("Ranking hypotheses...")
     ranked_hypotheses = rank(args, hypotheses, dataset1, dataset2, group_names)
-    # print(ranked_hypotheses)
+    print(ranked_hypotheses)
 
     logging.info("Evaluating hypotheses...")
     metrics = evaluate(args, ranked_hypotheses, group_names)
-    # print(metrics)
-
+    print(metrics)
+    # Save ranked hypotheses to JSON
+    save_results_to_json(group_names[0], group_names[1], ranked_hypotheses, 'ranked_hypotheses.json')
 
 if __name__ == "__main__":
     main()
+    

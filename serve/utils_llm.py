@@ -23,6 +23,7 @@ def get_llm_output(prompt: str, model: str) -> str:
     api_base = {
         "gpt-3.5-turbo": "https://api.openai.com/v1",
         "gpt-4": "https://api.openai.com/v1",
+        "gpt-4o": "https://api.openai.com/v1",
         "vicuna": VICUNA_URL,
     }
     openai.api_base = api_base[model]
@@ -90,7 +91,7 @@ Think carefully and summarize each difference in JSON format, such as:
 ```
 {{"difference": several words, "rationale": group 1... while group 2...}}
 ```
-Output JSON only. Do not include any other information.
+Output JSON only. Do not include any other information. Describe the differences in detail as much as possible.
 """
     return prompt
 
@@ -107,7 +108,7 @@ def get_differences(captions1: List[str], captions2: List[str], model: str) -> s
 
 def test_get_llm_output():
     prompt = "hello"
-    model = "gpt-4"
+    model = "gpt-4o"
     completion = get_llm_output(prompt, model)
     print(f"{model=}, {completion=}")
     model = "gpt-3.5-turbo"
